@@ -1,0 +1,1040 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Radar 8 — Gestão de Templates</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-main: #0b1120;
+    --bg-card: #161e2e;
+    --bg-input: #1f2937;
+    --accent: #00d1ff;
+    --green: #10b981;
+    --red: #ef4444;
+    --text-main: #f8fafc;
+    --text-muted: #94a3b8;
+    --border: #2d3748;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--bg-main);
+    color: var(--text-main);
+    padding: 24px;
+    min-height: 100vh;
+  }
+
+  .system-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 15px;
+  }
+
+  .logo-area h1 {
+    font-size: 20px;
+    color: var(--text-main);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .logo-area span {
+    color: var(--accent);
+    font-weight: 300;
+  }
+
+  .btn-new {
+    background: var(--accent);
+    color: #000;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 13px;
+    cursor: pointer;
+    transition: .2s ease;
+  }
+
+  .btn-new:hover {
+    transform: translateY(-1px);
+    filter: brightness(1.05);
+  }
+
+  .template-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 16px;
+    align-items: stretch;
+  }
+
+  .card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    transition: border-color 0.3s;
+  }
+
+  .card:hover { border-color: var(--accent); }
+
+  .card-header {
+    padding: 14px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .card-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-main);
+  }
+
+  .header-actions {
+    display: flex;
+    gap: 8px;
+    color: var(--text-muted);
+  }
+
+  .card-body {
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    flex: 1;
+  }
+
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .field-label {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+
+  .field-input,
+  .field-select {
+    width: 100%;
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 8px 32px 8px 10px;
+    color: var(--text-main);
+    font-size: 13px;
+    font-family: inherit;
+    outline: none;
+  }
+
+  .field-select {
+    padding-right: 10px;
+    appearance: none;
+    cursor: pointer;
+  }
+
+  .field-input--tall {
+    min-height: 50px;
+    resize: vertical;
+  }
+
+  .copy-btn {
+    position: absolute;
+    right: 8px;
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    transition: color 0.2s;
+  }
+
+  .copy-btn:hover { color: var(--accent); }
+
+  .card-footer {
+    padding: 12px 14px;
+    border-top: 1px solid var(--border);
+  }
+
+  .badge {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 4px;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .badge-auto {
+    background: rgba(16, 185, 129, 0.1);
+    color: var(--green);
+    border: 1px solid var(--green);
+  }
+
+  #toast {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--accent);
+    color: #000;
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-weight: 700;
+    display: none;
+    z-index: 3000;
+  }
+
+  /* ===== Modal Novo Template ===== */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(2, 8, 23, 0.78);
+    backdrop-filter: blur(4px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    z-index: 2000;
+  }
+
+  .modal-overlay.active {
+    display: flex;
+  }
+
+  .modal {
+    width: min(1120px, 100%);
+    max-height: 92vh;
+    background: #111827;
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 24px 70px rgba(0,0,0,0.45);
+    display: flex;
+    flex-direction: column;
+  }
+
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 18px 22px;
+    border-bottom: 1px solid var(--border);
+    background: linear-gradient(180deg, rgba(0, 209, 255, 0.08), rgba(0, 209, 255, 0));
+  }
+
+  .modal-title-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .modal-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text-main);
+  }
+
+  .modal-subtitle {
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+
+  .modal-close {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: #182235;
+    color: var(--text-main);
+    cursor: pointer;
+    font-size: 18px;
+    font-weight: 700;
+  }
+
+  .modal-body {
+    padding: 22px;
+    overflow-y: auto;
+  }
+
+  .template-builder-grid {
+    display: grid;
+    grid-template-columns: 1.15fr 0.85fr;
+    gap: 20px;
+  }
+
+  .builder-panel {
+    background: #141c2b;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 18px;
+  }
+
+  .panel-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-main);
+    margin-bottom: 14px;
+  }
+
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+
+  .form-grid .field.full {
+    grid-column: 1 / -1;
+  }
+
+  .base-template-note {
+    margin-top: 12px;
+    margin-bottom: 16px;
+    background: rgba(0, 209, 255, 0.06);
+    border: 1px solid rgba(0, 209, 255, 0.18);
+    color: #c7f5ff;
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-size: 12px;
+    line-height: 1.45;
+  }
+
+  .switch-row {
+    margin-top: 16px;
+    padding: 12px 14px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: #101827;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .switch-row span {
+    font-size: 13px;
+    font-weight: 500;
+  }
+
+  .switch-row input[type='checkbox'] {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--accent);
+    cursor: pointer;
+  }
+
+  .section-divider {
+    margin: 18px 0 12px;
+    padding-top: 14px;
+    border-top: 1px solid var(--border);
+  }
+
+  .section-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-main);
+    margin-bottom: 10px;
+  }
+
+  .section-subtitle {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+  }
+
+  .template-fields-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .template-field-card {
+    background: #0f172a;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px;
+  }
+
+  .template-field-top {
+    display: grid;
+    grid-template-columns: auto 1fr 150px auto;
+    gap: 10px;
+    align-items: end;
+  }
+
+  .use-field-box {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-bottom: 10px;
+  }
+
+  .use-field-box input {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--accent);
+    cursor: pointer;
+  }
+
+  .field-placeholder {
+    margin-top: 10px;
+  }
+
+  .btn-remove-field {
+    height: 40px;
+    min-width: 40px;
+    border-radius: 8px;
+    border: 1px solid rgba(239, 68, 68, 0.25);
+    background: rgba(239, 68, 68, 0.10);
+    color: #fca5a5;
+    cursor: pointer;
+    font-weight: 700;
+  }
+
+  .btn-add-field {
+    width: 100%;
+    margin-top: 14px;
+    padding: 12px 14px;
+    border-radius: 10px;
+    border: 1px dashed rgba(0, 209, 255, 0.35);
+    background: #122034;
+    color: var(--accent);
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .preview-box {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .preview-header {
+    background: #0f172a;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px;
+  }
+
+  .preview-name {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-main);
+  }
+
+  .preview-meta {
+    margin-top: 6px;
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  .preview-channel {
+    display: inline-block;
+    margin-top: 10px;
+    padding: 5px 8px;
+    border-radius: 999px;
+    background: rgba(0, 209, 255, 0.10);
+    border: 1px solid rgba(0, 209, 255, 0.20);
+    color: var(--accent);
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+  }
+
+  .preview-fields {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .preview-field {
+    background: #0f172a;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px;
+  }
+
+  .preview-field-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    display: block;
+    margin-bottom: 8px;
+  }
+
+  .preview-field-box {
+    min-height: 38px;
+    border-radius: 8px;
+    border: 1px solid #2a3446;
+    background: #172033;
+  }
+
+  .preview-empty {
+    padding: 16px;
+    border-radius: 12px;
+    border: 1px dashed var(--border);
+    color: var(--text-muted);
+    text-align: center;
+    font-size: 13px;
+    background: #0f172a;
+  }
+
+  .modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    padding: 18px 22px;
+    border-top: 1px solid var(--border);
+    background: #0f172a;
+  }
+
+  .btn-cancel-modal {
+    background: transparent;
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+    padding: 12px 18px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 700;
+  }
+
+  .btn-save-template {
+    background: var(--accent);
+    color: #000;
+    border: none;
+    padding: 12px 18px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 700;
+  }
+
+  @media (max-width: 1400px) {
+    .template-grid {
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    }
+  }
+
+  @media (max-width: 980px) {
+    .template-builder-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .form-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .template-field-top {
+      grid-template-columns: 1fr;
+    }
+
+    .use-field-box {
+      justify-content: flex-start;
+      padding-bottom: 0;
+    }
+  }
+</style>
+</head>
+<body>
+
+<nav class="system-nav">
+  <div class="logo-area">
+    <h1>RADAR <span>8</span></h1>
+  </div>
+  <button class="btn-new" id="openTemplateModal">+ Novo Template</button>
+</nav>
+
+<div class="template-grid">
+
+  <article class="card">
+    <div class="card-header">
+      <span class="card-title">1. E-mail</span>
+      <div class="header-actions">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="field"><label class="field-label">Para</label><div class="input-wrapper"><input type="text" class="field-input" value="exemplo@cliente.com"><button class="copy-btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></button></div></div>
+      <div class="field"><label class="field-label">C/c</label><div class="input-wrapper"><input type="text" class="field-input" value=""><button class="copy-btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></button></div></div>
+      <div class="field"><label class="field-label">Assunto</label><div class="input-wrapper"><input type="text" class="field-input" value="Apresentação Radar 8"><button class="copy-btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></button></div></div>
+      <div class="field"><label class="field-label">Texto</label><div class="input-wrapper"><textarea class="field-input field-input--tall">Olá, segue apresentação...</textarea><button class="copy-btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></button></div></div>
+      <div class="field"><label class="field-label">Instruções</label><div class="input-wrapper"><input type="text" class="field-input" value="Enviar em horário comercial"><button class="copy-btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></button></div></div>
+    </div>
+    <div class="card-footer"><span class="badge badge-auto">● Automação Futura</span></div>
+  </article>
+
+  <article class="card">
+    <div class="card-header">
+      <span class="card-title">2. Celular</span>
+      <div class="header-actions">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="field"><label class="field-label">Celular (55 DDD...)</label><div class="input-wrapper"><input type="text" class="field-input" value="5511999999999"><button class="copy-btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></button></div></div>
+      <div class="field"><label class="field-label">Mensagem Whatsapp</label><div class="input-wrapper"><textarea class="field-input field-input--tall">Oi, sou o Victor do Radar 8!</textarea><button class="copy-btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></button></div></div>
+      <div class="field"><label class="field-label">SMS</label><div class="input-wrapper"><input type="text" class="field-input" value="Seu código é 1234"><button class="copy-btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></button></div></div>
+      <div class="field"><label class="field-label">Instrução IA</label><div class="input-wrapper"><input type="text" class="field-input" value="Tom de voz amigável"><button class="copy-btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></button></div></div>
+    </div>
+    <div class="card-footer"><span class="badge badge-auto">● Automação Futura</span></div>
+  </article>
+
+  <article class="card">
+    <div class="card-header">
+      <span class="card-title">3. Redes sociais</span>
+      <div class="header-actions">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="field"><label class="field-label">Abrir Instagram / Mensagem</label><div class="input-wrapper"><input type="text" class="field-input" value="@perfil_cliente"><button class="copy-btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></button></div></div>
+      <div class="field"><label class="field-label">Instruções</label><div class="input-wrapper"><input type="text" class="field-input" value="Curtir 3 fotos antes"><button class="copy-btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></button></div></div>
+      <div class="field"><label class="field-label">Facebook</label><div class="input-wrapper"><input type="text" class="field-input" value="Postagem grupo X"><button class="copy-btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></button></div></div>
+    </div>
+    <div class="card-footer"><span class="badge badge-auto">● Automação Futura</span></div>
+  </article>
+
+  <article class="card">
+    <div class="card-header">
+      <span class="card-title">4. Inmail</span>
+      <div class="header-actions">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="field"><label class="field-label">Assunto</label><div class="input-wrapper"><input type="text" class="field-input" value="Conexão Estratégica"><button class="copy-btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></button></div></div>
+      <div class="field"><label class="field-label">Texto</label><div class="input-wrapper"><textarea class="field-input field-input--tall">Vi seu perfil no LinkedIn...</textarea><button class="copy-btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></button></div></div>
+    </div>
+  </article>
+
+  <article class="card">
+    <div class="card-header">
+      <span class="card-title">5. Mail</span>
+      <div class="header-actions">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="field"><label class="field-label">Destinatário</label><div class="input-wrapper"><input type="text" class="field-input" value="João Silva"><button class="copy-btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></button></div></div>
+      <div class="field"><label class="field-label">Conteúdo</label><div class="input-wrapper"><textarea class="field-input field-input--tall">Kit Boas Vindas Radar 8</textarea><button class="copy-btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></button></div></div>
+      <div class="field"><label class="field-label">Anexos</label><div class="input-wrapper"><input type="text" class="field-input" value="Folder_v1.pdf"><button class="copy-btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></button></div></div>
+    </div>
+  </article>
+
+</div>
+
+<div id="toast">Copiado para a área de transferência!</div>
+
+<div class="modal-overlay" id="templateModalOverlay">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="templateModalTitle">
+    <div class="modal-header">
+      <div class="modal-title-wrap">
+        <h2 class="modal-title" id="templateModalTitle">Novo Template</h2>
+        <p class="modal-subtitle">Comece com um modelo que já existe e ajuste os campos do seu jeito.</p>
+      </div>
+      <button class="modal-close" id="closeTemplateModal" aria-label="Fechar">×</button>
+    </div>
+
+    <div class="modal-body">
+      <div class="template-builder-grid">
+
+        <div class="builder-panel">
+          <div class="panel-title">Configuração</div>
+
+          <div class="form-grid">
+            <div class="field full">
+              <label class="field-label">Modelo Base</label>
+              <select class="field-select" id="baseTemplateModel">
+                <option value="email">E-mail</option>
+                <option value="celular">Celular</option>
+                <option value="redes">Redes sociais</option>
+                <option value="inmail">Inmail</option>
+                <option value="mail">Mail</option>
+              </select>
+            </div>
+
+            <div class="field full">
+              <label class="field-label">Nome Do Novo Template</label>
+              <input type="text" class="field-input" id="templateName" placeholder="Ex.: E-mail Prospecção Premium">
+            </div>
+
+            <div class="field">
+              <label class="field-label">Canal</label>
+              <input type="text" class="field-input" id="templateChannel" value="E-mail">
+            </div>
+
+            <div class="field">
+              <label class="field-label">Categoria</label>
+              <input type="text" class="field-input" id="templateCategory" placeholder="Ex.: Prospecção">
+            </div>
+
+            <div class="field full">
+              <label class="field-label">Descrição</label>
+              <textarea class="field-input field-input--tall" id="templateDescription" placeholder="Descreva o objetivo desse template..."></textarea>
+            </div>
+          </div>
+
+          <div class="base-template-note" id="baseTemplateNote">
+            Você começou com o modelo de E-mail. Agora pode desligar campos que não quer usar, editar nomes e adicionar novos.
+          </div>
+
+          <div class="switch-row">
+            <span>Marcar como automação futura</span>
+            <input type="checkbox" id="templateAutomation" checked>
+          </div>
+
+          <div class="section-divider">
+            <div class="section-title">Campos Do Template</div>
+            <div class="section-subtitle">Os campos abaixo já vêm do modelo base. Basta manter, retirar ou complementar.</div>
+
+            <div class="template-fields-list" id="templateFieldsList"></div>
+
+            <button class="btn-add-field" id="addFieldBtn" type="button">+ Adicionar Novo Campo</button>
+          </div>
+        </div>
+
+        <div class="builder-panel">
+          <div class="panel-title">Pré-visualização</div>
+
+          <div class="preview-box">
+            <div class="preview-header">
+              <div class="preview-name" id="previewName">Novo template</div>
+              <div class="preview-meta" id="previewMeta">Sem categoria definida</div>
+              <span class="preview-channel" id="previewChannel">E-mail</span>
+            </div>
+
+            <div class="preview-fields" id="previewFields"></div>
+
+            <div class="card-footer" style="padding:0; border-top:none;">
+              <span class="badge badge-auto" id="previewAutomationBadge">● Automação Futura</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-cancel-modal" id="cancelTemplateModal" type="button">Cancelar</button>
+      <button class="btn-save-template" id="saveTemplateBtn" type="button">Salvar Template</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.querySelectorAll('.copy-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const input = this.parentElement.querySelector('.field-input');
+      input.select();
+      document.execCommand('copy');
+
+      const toast = document.getElementById('toast');
+      toast.textContent = 'Copiado para a área de transferência!';
+      toast.style.display = 'block';
+      setTimeout(() => { toast.style.display = 'none'; }, 2000);
+
+      this.style.color = 'var(--accent)';
+      setTimeout(() => { this.style.color = 'var(--text-muted)'; }, 1000);
+    });
+  });
+
+  const baseTemplates = {
+    email: {
+      label: 'E-mail',
+      channel: 'E-mail',
+      category: 'Prospecção',
+      description: 'Modelo mais completo para comunicação por e-mail.',
+      note: 'Você começou com o modelo de E-mail. Agora pode desligar campos que não quer usar, editar nomes e adicionar novos.',
+      fields: [
+        { label: 'Para', type: 'email', placeholder: 'exemplo@cliente.com', enabled: true },
+        { label: 'C/c', type: 'text', placeholder: 'Digite aqui', enabled: true },
+        { label: 'Assunto', type: 'text', placeholder: 'Digite o assunto', enabled: true },
+        { label: 'Texto', type: 'textarea', placeholder: 'Digite o conteúdo principal', enabled: true },
+        { label: 'Instruções', type: 'textarea', placeholder: 'Ex.: enviar em horário comercial', enabled: true }
+      ]
+    },
+    celular: {
+      label: 'Celular',
+      channel: 'Whatsapp / SMS',
+      category: 'Contato Rápido',
+      description: 'Base para contato por celular, whatsapp ou sms.',
+      note: 'Esse modelo já traz a estrutura de celular. Você pode manter só o que fizer sentido e complementar com novos campos.',
+      fields: [
+        { label: 'Celular', type: 'text', placeholder: '5511999999999', enabled: true },
+        { label: 'Mensagem Whatsapp', type: 'textarea', placeholder: 'Digite a mensagem', enabled: true },
+        { label: 'SMS', type: 'text', placeholder: 'Digite o texto do SMS', enabled: true },
+        { label: 'Instrução IA', type: 'textarea', placeholder: 'Ex.: tom de voz amigável', enabled: true }
+      ]
+    },
+    redes: {
+      label: 'Redes sociais',
+      channel: 'Redes sociais',
+      category: 'Social',
+      description: 'Base para ações em instagram, facebook e afins.',
+      note: 'Aqui a ideia é partir da estrutura social e deixar só os campos que realmente entram no seu fluxo.',
+      fields: [
+        { label: 'Perfil / Conta', type: 'text', placeholder: '@perfil_cliente', enabled: true },
+        { label: 'Mensagem', type: 'textarea', placeholder: 'Digite a mensagem', enabled: true },
+        { label: 'Instruções', type: 'textarea', placeholder: 'Ex.: curtir 3 fotos antes', enabled: true }
+      ]
+    },
+    inmail: {
+      label: 'Inmail',
+      channel: 'Inmail',
+      category: 'LinkedIn',
+      description: 'Base simples para mensagem direta via LinkedIn.',
+      note: 'Modelo enxuto. Pode expandir com contexto, nome da conta, CTA e o que mais precisar.',
+      fields: [
+        { label: 'Assunto', type: 'text', placeholder: 'Digite o assunto', enabled: true },
+        { label: 'Texto', type: 'textarea', placeholder: 'Digite a mensagem', enabled: true }
+      ]
+    },
+    mail: {
+      label: 'Mail',
+      channel: 'Mail',
+      category: 'Envio Físico',
+      description: 'Base para carta, kit ou material físico.',
+      note: 'Modelo para carta, kit ou material físico. Você pode tirar campos e acrescentar endereço, CEP, observações etc.',
+      fields: [
+        { label: 'Destinatário', type: 'text', placeholder: 'Nome do destinatário', enabled: true },
+        { label: 'Conteúdo', type: 'textarea', placeholder: 'Descreva o conteúdo', enabled: true },
+        { label: 'Anexos', type: 'text', placeholder: 'Ex.: Folder_v1.pdf', enabled: true }
+      ]
+    }
+  };
+
+  const openTemplateModal = document.getElementById('openTemplateModal');
+  const templateModalOverlay = document.getElementById('templateModalOverlay');
+  const closeTemplateModal = document.getElementById('closeTemplateModal');
+  const cancelTemplateModal = document.getElementById('cancelTemplateModal');
+  const saveTemplateBtn = document.getElementById('saveTemplateBtn');
+  const addFieldBtn = document.getElementById('addFieldBtn');
+
+  const baseTemplateModel = document.getElementById('baseTemplateModel');
+  const templateName = document.getElementById('templateName');
+  const templateChannel = document.getElementById('templateChannel');
+  const templateCategory = document.getElementById('templateCategory');
+  const templateDescription = document.getElementById('templateDescription');
+  const templateAutomation = document.getElementById('templateAutomation');
+  const baseTemplateNote = document.getElementById('baseTemplateNote');
+  const templateFieldsList = document.getElementById('templateFieldsList');
+
+  const previewName = document.getElementById('previewName');
+  const previewMeta = document.getElementById('previewMeta');
+  const previewChannel = document.getElementById('previewChannel');
+  const previewFields = document.getElementById('previewFields');
+  const previewAutomationBadge = document.getElementById('previewAutomationBadge');
+
+  function openModal() {
+    templateModalOverlay.classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeModal() {
+    templateModalOverlay.classList.remove('active');
+    document.body.style.overflow = '';
+  }
+
+  function showToast(message) {
+    const toast = document.getElementById('toast');
+    toast.textContent = message;
+    toast.style.display = 'block';
+    setTimeout(() => { toast.style.display = 'none'; }, 2200);
+  }
+
+  function escapeHtml(value) {
+    return String(value || '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
+
+  function getTypeLabel(type) {
+    const map = {
+      text: 'Texto Curto',
+      textarea: 'Texto Longo',
+      email: 'E-mail',
+      number: 'Número',
+      date: 'Data'
+    };
+    return map[type] || 'Campo';
+  }
+
+  function createFieldCard(field = { label: '', type: 'text', placeholder: '', enabled: true }) {
+    const item = document.createElement('div');
+    item.className = 'template-field-card';
+
+    item.innerHTML = `
+      <div class="template-field-top">
+        <div class="use-field-box">
+          <input type="checkbox" class="js-enabled" ${field.enabled ? 'checked' : ''} title="Usar este campo">
+        </div>
+
+        <div class="field">
+          <label class="field-label">Nome Do Campo</label>
+          <input type="text" class="field-input js-label" value="${escapeHtml(field.label)}" placeholder="Nome do campo">
+        </div>
+
+        <div class="field">
+          <label class="field-label">Tipo</label>
+          <select class="field-select js-type">
+            <option value="text" ${field.type === 'text' ? 'selected' : ''}>Texto Curto</option>
+            <option value="textarea" ${field.type === 'textarea' ? 'selected' : ''}>Texto Longo</option>
+            <option value="email" ${field.type === 'email' ? 'selected' : ''}>E-mail</option>
+            <option value="number" ${field.type === 'number' ? 'selected' : ''}>Número</option>
+            <option value="date" ${field.type === 'date' ? 'selected' : ''}>Data</option>
+          </select>
+        </div>
+
+        <button class="btn-remove-field" type="button" title="Remover campo">×</button>
+      </div>
+
+      <div class="field field-placeholder">
+        <label class="field-label">Placeholder</label>
+        <input type="text" class="field-input js-placeholder" value="${escapeHtml(field.placeholder)}" placeholder="Ex.: Digite aqui">
+      </div>
+    `;
+
+    item.querySelectorAll('input, select').forEach(el => {
+      el.addEventListener('input', updatePreview);
+      el.addEventListener('change', updatePreview);
+    });
+
+    item.querySelector('.btn-remove-field').addEventListener('click', () => {
+      item.remove();
+      updatePreview();
+    });
+
+    templateFieldsList.appendChild(item);
+  }
+
+  function getCurrentFields() {
+    return [...templateFieldsList.querySelectorAll('.template-field-card')].map(card => ({
+      enabled: card.querySelector('.js-enabled').checked,
+      label: card.querySelector('.js-label').value.trim(),
+      type: card.querySelector('.js-type').value,
+      placeholder: card.querySelector('.js-placeholder').value.trim()
+    }));
+  }
+
+  function updatePreview() {
+    previewName.textContent = templateName.value.trim() || 'Novo template';
+    previewMeta.textContent = templateCategory.value.trim() || 'Sem categoria definida';
+    previewChannel.textContent = templateChannel.value.trim() || 'Sem canal';
+
+    previewAutomationBadge.style.display = templateAutomation.checked ? 'inline-flex' : 'none';
+
+    const activeFields = getCurrentFields().filter(field => field.enabled);
+
+    if (!activeFields.length) {
+      previewFields.innerHTML = `<div class="preview-empty">Nenhum campo ativo no template.</div>`;
+      return;
+    }
+
+    previewFields.innerHTML = activeFields.map(field => `
+      <div class="preview-field">
+        <span class="preview-field-label">${escapeHtml(field.label || 'Campo sem nome')} • ${escapeHtml(getTypeLabel(field.type))}</span>
+        <div class="preview-field-box"></div>
+      </div>
+    `).join('');
+  }
+
+  function loadBaseTemplate(templateKey) {
+    const template = baseTemplates[templateKey];
+    if (!template) return;
+
+    templateName.value = '';
+    templateChannel.value = template.channel;
+    templateCategory.value = template.category;
+    templateDescription.value = template.description;
+    baseTemplateNote.textContent = template.note;
+    templateFieldsList.innerHTML = '';
+
+    template.fields.forEach(field => createFieldCard(field));
+    updatePreview();
+  }
+
+  openTemplateModal.addEventListener('click', () => {
+    openModal();
+    loadBaseTemplate(baseTemplateModel.value);
+  });
+
+  closeTemplateModal.addEventListener('click', closeModal);
+  cancelTemplateModal.addEventListener('click', closeModal);
+
+  templateModalOverlay.addEventListener('click', function(e) {
+    if (e.target === templateModalOverlay) closeModal();
+  });
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && templateModalOverlay.classList.contains('active')) {
+      closeModal();
+    }
+  });
+
+  baseTemplateModel.addEventListener('change', function() {
+    loadBaseTemplate(this.value);
+  });
+
+  [templateName, templateChannel, templateCategory, templateDescription, templateAutomation].forEach(el => {
+    el.addEventListener('input', updatePreview);
+    el.addEventListener('change', updatePreview);
+  });
+
+  addFieldBtn.addEventListener('click', function() {
+    createFieldCard({
+      label: '',
+      type: 'text',
+      placeholder: '',
+      enabled: true
+    });
+    updatePreview();
+  });
+
+  saveTemplateBtn.addEventListener('click', function() {
+    const name = templateName.value.trim();
+    const activeFields = getCurrentFields().filter(field => field.enabled);
+
+    if (!name) {
+      showToast('Preencha o nome do template.');
+      return;
+    }
+
+    if (!activeFields.length) {
+      showToast('Deixe pelo menos um campo ativo.');
+      return;
+    }
+
+    showToast('Template configurado com sucesso!');
+    closeModal();
+  });
+
+  loadBaseTemplate('email');
+</script>
+
+</body>
+</html>
