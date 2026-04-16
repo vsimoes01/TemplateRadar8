@@ -4,69 +4,195 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Radar 8 — Gestão de Templates</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg-main: #0b1120;
-    --bg-card: #161e2e;
-    --bg-input: #1f2937;
-    --accent: #00d1ff;
-    --green: #10b981;
-    --red: #ef4444;
-    --text-main: #f8fafc;
-    --text-muted: #94a3b8;
-    --border: #2d3748;
+    --bg-main: #06090f;
+    --bg-card: #0d1219;
+    --bg-card-hover: #111820;
+    --bg-input: #141c28;
+    --bg-surface: #0a0f18;
+    --accent: #00d4ff;
+    --accent-dim: rgba(0, 212, 255, 0.08);
+    --accent-glow: rgba(0, 212, 255, 0.15);
+    --green: #34d399;
+    --green-dim: rgba(52, 211, 153, 0.10);
+    --red: #f87171;
+    --red-dim: rgba(248, 113, 113, 0.08);
+    --text-main: #eaf0f6;
+    --text-secondary: #a0b0c8;
+    --text-muted: #7a8da6;
+    --border: rgba(255, 255, 255, 0.06);
+    --border-hover: rgba(0, 212, 255, 0.25);
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 16px;
+    --radius-xl: 20px;
+    --shadow-card: 0 1px 3px rgba(0,0,0,0.3), 0 0 0 1px var(--border);
+    --shadow-hover: 0 8px 32px rgba(0,0,0,0.4), 0 0 0 1px var(--border-hover);
+    --shadow-modal: 0 40px 100px rgba(0,0,0,0.6);
+    --font-body: 'Source Sans 3', 'Segoe UI', sans-serif;
+    --font-mono: 'IBM Plex Mono', monospace;
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
   body {
-    font-family: 'Inter', sans-serif;
+    font-family: var(--font-body);
     background-color: var(--bg-main);
     color: var(--text-main);
-    padding: 24px;
     min-height: 100vh;
+    overflow-x: hidden;
   }
 
+  /* ── Noise texture overlay ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    opacity: 0.025;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-size: 200px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── Ambient glow ── */
+  body::after {
+    content: '';
+    position: fixed;
+    top: -30%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 900px;
+    height: 500px;
+    background: radial-gradient(ellipse, rgba(0, 212, 255, 0.04) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .app-shell {
+    position: relative;
+    z-index: 1;
+    max-width: 100%;
+    margin: 0 auto;
+    padding: 20px 32px 60px;
+  }
+
+  /* ═══════════════════════════════════════
+     NAVIGATION
+  ═══════════════════════════════════════ */
   .system-nav {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 30px;
+    margin-bottom: 32px;
+    padding-bottom: 20px;
     border-bottom: 1px solid var(--border);
-    padding-bottom: 15px;
   }
 
-  .logo-area h1 {
-    font-size: 20px;
-    color: var(--text-main);
+  .logo-area {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .logo-mark {
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-sm);
+    background: linear-gradient(135deg, var(--accent), #0090b0);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-mono);
+    font-weight: 700;
+    font-size: 14px;
+    color: #000;
+    letter-spacing: -0.5px;
+  }
+
+  .logo-text {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .logo-text h1 {
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+    line-height: 1;
+  }
+
+  .logo-text h1 span {
+    color: var(--accent);
+    font-weight: 300;
+    margin-left: 3px;
+  }
+
+  .logo-text small {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-weight: 400;
+    margin-top: 2px;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+  }
+
+  .nav-actions {
     display: flex;
     align-items: center;
     gap: 10px;
   }
 
-  .logo-area span {
+  .template-count {
+    font-size: 13px;
+    color: var(--text-secondary);
+    padding: 8px 14px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--bg-card);
+  }
+
+  .template-count strong {
     color: var(--accent);
-    font-weight: 300;
+    font-weight: 700;
   }
 
   .btn-new {
     background: var(--accent);
     color: #000;
     border: none;
-    padding: 10px 16px;
-    border-radius: 8px;
+    padding: 10px 18px;
+    border-radius: var(--radius-sm);
     font-weight: 700;
     font-size: 13px;
+    font-family: var(--font-body);
     cursor: pointer;
-    transition: .2s ease;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    letter-spacing: -0.2px;
   }
 
   .btn-new:hover {
     transform: translateY(-1px);
-    filter: brightness(1.05);
+    box-shadow: 0 4px 20px rgba(0, 212, 255, 0.3);
   }
 
+  .btn-new:active {
+    transform: translateY(0);
+  }
+
+  .btn-new svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  /* ═══════════════════════════════════════
+     TEMPLATE GRID
+  ═══════════════════════════════════════ */
   .template-grid {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
@@ -74,55 +200,123 @@
     align-items: stretch;
   }
 
+  /* ── Card ── */
   .card {
     background: var(--bg-card);
     border: 1px solid var(--border);
-    border-radius: 8px;
+    border-radius: var(--radius-lg);
     display: flex;
     flex-direction: column;
-    transition: border-color 0.3s;
+    transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+    animation: cardEnter 0.5s cubic-bezier(0.22, 1, 0.36, 1) backwards;
   }
 
-  .card:hover { border-color: var(--accent); }
+  .card:nth-child(1) { animation-delay: 0s; }
+  .card:nth-child(2) { animation-delay: 0.06s; }
+  .card:nth-child(3) { animation-delay: 0.12s; }
+  .card:nth-child(4) { animation-delay: 0.18s; }
+  .card:nth-child(5) { animation-delay: 0.24s; }
+
+  @keyframes cardEnter {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    opacity: 0;
+    transition: opacity 0.35s;
+  }
+
+  .card:hover {
+    border-color: var(--border-hover);
+    background: var(--bg-card-hover);
+    box-shadow: var(--shadow-hover);
+    transform: translateY(-2px);
+  }
+
+  .card:hover::before {
+    opacity: 1;
+  }
 
   .card-header {
-    padding: 14px;
-    border-bottom: 1px solid var(--border);
+    padding: 14px 18px;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .card-number {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-muted);
+    background: rgba(255,255,255,0.04);
+    padding: 2px 7px;
+    border-radius: 4px;
+    margin-right: 8px;
   }
 
   .card-title {
-    font-size: 14px;
+    font-size: 15px;
     font-weight: 600;
     color: var(--text-main);
+    display: flex;
+    align-items: center;
+    letter-spacing: -0.1px;
   }
 
   .header-actions {
     display: flex;
-    gap: 8px;
+    gap: 4px;
+  }
+
+  .icon-btn {
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-sm);
+    border: none;
+    background: transparent;
     color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .icon-btn:hover {
+    background: var(--accent-dim);
+    color: var(--accent);
   }
 
   .card-body {
-    padding: 14px;
+    padding: 16px 18px;
     display: flex;
     flex-direction: column;
     gap: 12px;
     flex: 1;
   }
 
+  /* ── Fields ── */
   .field {
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 5px;
   }
 
   .field-label {
-    font-size: 10px;
+    font-size: 11px;
     font-weight: 600;
-    color: var(--text-muted);
+    color: var(--text-secondary);
     text-transform: uppercase;
     letter-spacing: 0.5px;
   }
@@ -138,145 +332,258 @@
     width: 100%;
     background: var(--bg-input);
     border: 1px solid var(--border);
-    border-radius: 4px;
-    padding: 8px 32px 8px 10px;
+    border-radius: var(--radius-sm);
+    padding: 10px 34px 10px 12px;
     color: var(--text-main);
-    font-size: 13px;
-    font-family: inherit;
+    font-size: 14px;
+    font-family: var(--font-body);
     outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+
+  .field-input:focus,
+  .field-select:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-dim);
   }
 
   .field-select {
-    padding-right: 10px;
+    padding-right: 11px;
     appearance: none;
     cursor: pointer;
   }
 
   .field-input--tall {
-    min-height: 50px;
+    min-height: 52px;
     resize: vertical;
+    line-height: 1.45;
   }
 
   .copy-btn {
     position: absolute;
-    right: 8px;
+    right: 6px;
+    width: 26px;
+    height: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 5px;
     background: transparent;
     border: none;
     color: var(--text-muted);
     cursor: pointer;
-    display: flex;
-    align-items: center;
-    transition: color 0.2s;
+    transition: all 0.2s;
   }
 
-  .copy-btn:hover { color: var(--accent); }
+  .copy-btn:hover {
+    color: var(--accent);
+    background: var(--accent-dim);
+  }
 
+  .copy-btn.copied {
+    color: var(--green);
+  }
+
+  /* ── Card Footer ── */
   .card-footer {
-    padding: 12px 14px;
+    padding: 14px 18px;
     border-top: 1px solid var(--border);
   }
 
   .badge {
     font-size: 11px;
-    font-weight: 600;
+    font-weight: 700;
     padding: 4px 10px;
-    border-radius: 4px;
+    border-radius: 999px;
     display: inline-flex;
     align-items: center;
     gap: 5px;
+    letter-spacing: 0.2px;
+    text-transform: uppercase;
   }
 
   .badge-auto {
-    background: rgba(16, 185, 129, 0.1);
+    background: var(--green-dim);
     color: var(--green);
-    border: 1px solid var(--green);
+    border: 1px solid rgba(52, 211, 153, 0.15);
   }
 
+  .badge-auto::before {
+    content: '';
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--green);
+    animation: pulse-dot 2s ease infinite;
+  }
+
+  @keyframes pulse-dot {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  /* ═══════════════════════════════════════
+     TOAST
+  ═══════════════════════════════════════ */
   #toast {
     position: fixed;
-    bottom: 20px;
+    bottom: 28px;
     left: 50%;
-    transform: translateX(-50%);
-    background: var(--accent);
-    color: #000;
-    padding: 10px 20px;
-    border-radius: 6px;
-    font-weight: 700;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--bg-card);
+    color: var(--text-main);
+    padding: 12px 22px;
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    font-size: 13px;
     display: none;
     z-index: 3000;
+    border: 1px solid var(--border-hover);
+    box-shadow: 0 16px 50px rgba(0,0,0,0.5);
+    backdrop-filter: blur(12px);
+    animation: toastIn 0.3s cubic-bezier(0.22, 1, 0.36, 1) forwards;
   }
 
-  /* ===== Modal Novo Template ===== */
+  #toast.visible {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  #toast::before {
+    content: '✓';
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  @keyframes toastIn {
+    from { transform: translateX(-50%) translateY(20px); opacity: 0; }
+    to { transform: translateX(-50%) translateY(0); opacity: 1; }
+  }
+
+  /* ═══════════════════════════════════════
+     MODAL
+  ═══════════════════════════════════════ */
   .modal-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(2, 8, 23, 0.78);
-    backdrop-filter: blur(4px);
+    background: rgba(2, 5, 12, 0.82);
+    backdrop-filter: blur(8px);
     display: none;
     align-items: center;
     justify-content: center;
     padding: 24px;
     z-index: 2000;
+    opacity: 0;
+    transition: opacity 0.25s ease;
   }
 
   .modal-overlay.active {
     display: flex;
+    animation: overlayIn 0.25s ease forwards;
+  }
+
+  @keyframes overlayIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
   }
 
   .modal {
-    width: min(1120px, 100%);
+    width: min(1140px, 100%);
     max-height: 92vh;
-    background: #111827;
+    background: var(--bg-surface);
     border: 1px solid var(--border);
-    border-radius: 18px;
+    border-radius: var(--radius-xl);
     overflow: hidden;
-    box-shadow: 0 24px 70px rgba(0,0,0,0.45);
+    box-shadow: var(--shadow-modal);
     display: flex;
     flex-direction: column;
+    animation: modalIn 0.35s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  }
+
+  @keyframes modalIn {
+    from { opacity: 0; transform: scale(0.97) translateY(10px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
   }
 
   .modal-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 18px 22px;
+    padding: 20px 24px;
     border-bottom: 1px solid var(--border);
-    background: linear-gradient(180deg, rgba(0, 209, 255, 0.08), rgba(0, 209, 255, 0));
+    position: relative;
+    overflow: hidden;
+  }
+
+  .modal-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
   }
 
   .modal-title-wrap {
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 3px;
   }
 
   .modal-title {
-    font-size: 20px;
+    font-size: 18px;
     font-weight: 700;
     color: var(--text-main);
+    letter-spacing: -0.3px;
   }
 
   .modal-subtitle {
     font-size: 13px;
-    color: var(--text-muted);
+    color: var(--text-secondary);
   }
 
   .modal-close {
-    width: 38px;
-    height: 38px;
-    border-radius: 10px;
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-sm);
     border: 1px solid var(--border);
-    background: #182235;
-    color: var(--text-main);
+    background: var(--bg-card);
+    color: var(--text-secondary);
     cursor: pointer;
     font-size: 18px;
     font-weight: 700;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .modal-close:hover {
+    border-color: var(--red);
+    color: var(--red);
+    background: var(--red-dim);
   }
 
   .modal-body {
-    padding: 22px;
+    padding: 24px;
     overflow-y: auto;
+    flex: 1;
   }
+
+  .modal-body::-webkit-scrollbar { width: 6px; }
+  .modal-body::-webkit-scrollbar-track { background: transparent; }
+  .modal-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
 
   .template-builder-grid {
     display: grid;
@@ -285,17 +592,19 @@
   }
 
   .builder-panel {
-    background: #141c2b;
+    background: var(--bg-card);
     border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 18px;
+    border-radius: var(--radius-lg);
+    padding: 20px;
   }
 
   .panel-title {
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 700;
-    color: var(--text-main);
-    margin-bottom: 14px;
+    color: var(--text-secondary);
+    margin-bottom: 16px;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
   }
 
   .form-grid {
@@ -309,23 +618,23 @@
   }
 
   .base-template-note {
-    margin-top: 12px;
+    margin-top: 14px;
     margin-bottom: 16px;
-    background: rgba(0, 209, 255, 0.06);
-    border: 1px solid rgba(0, 209, 255, 0.18);
-    color: #c7f5ff;
-    border-radius: 10px;
+    background: var(--accent-dim);
+    border: 1px solid rgba(0, 212, 255, 0.12);
+    color: #a8e4f4;
+    border-radius: var(--radius-md);
     padding: 12px 14px;
     font-size: 12px;
-    line-height: 1.45;
+    line-height: 1.5;
   }
 
   .switch-row {
     margin-top: 16px;
-    padding: 12px 14px;
+    padding: 14px;
     border: 1px solid var(--border);
-    border-radius: 10px;
-    background: #101827;
+    border-radius: var(--radius-md);
+    background: var(--bg-surface);
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -334,18 +643,47 @@
   .switch-row span {
     font-size: 13px;
     font-weight: 500;
+    color: var(--text-secondary);
   }
 
-  .switch-row input[type='checkbox'] {
-    width: 18px;
-    height: 18px;
-    accent-color: var(--accent);
+  /* ── Toggle ── */
+  .toggle-track {
+    width: 42px;
+    height: 24px;
+    background: var(--bg-input);
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    position: relative;
     cursor: pointer;
+    transition: all 0.25s;
+    flex-shrink: 0;
+  }
+
+  .toggle-track.active {
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+
+  .toggle-track::after {
+    content: '';
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--text-muted);
+    transition: all 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .toggle-track.active::after {
+    left: 21px;
+    background: #000;
   }
 
   .section-divider {
-    margin: 18px 0 12px;
-    padding-top: 14px;
+    margin: 20px 0 14px;
+    padding-top: 16px;
     border-top: 1px solid var(--border);
   }
 
@@ -353,31 +691,41 @@
     font-size: 13px;
     font-weight: 700;
     color: var(--text-main);
-    margin-bottom: 10px;
+    margin-bottom: 4px;
+    letter-spacing: -0.2px;
   }
 
   .section-subtitle {
     font-size: 12px;
     color: var(--text-muted);
-    margin-bottom: 12px;
+    margin-bottom: 14px;
   }
 
   .template-fields-list {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 10px;
   }
 
   .template-field-card {
-    background: #0f172a;
+    background: var(--bg-surface);
     border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 12px;
+    border-radius: var(--radius-md);
+    padding: 14px;
+    transition: border-color 0.2s;
+  }
+
+  .template-field-card:hover {
+    border-color: rgba(255,255,255,0.1);
+  }
+
+  .template-field-card.disabled {
+    opacity: 0.4;
   }
 
   .template-field-top {
     display: grid;
-    grid-template-columns: auto 1fr 150px auto;
+    grid-template-columns: auto 1fr 140px auto;
     gap: 10px;
     align-items: end;
   }
@@ -389,11 +737,33 @@
     padding-bottom: 10px;
   }
 
-  .use-field-box input {
-    width: 18px;
-    height: 18px;
-    accent-color: var(--accent);
+  .custom-check {
+    width: 20px;
+    height: 20px;
+    border-radius: 5px;
+    border: 1.5px solid var(--border);
+    background: var(--bg-input);
     cursor: pointer;
+    position: relative;
+    transition: all 0.2s;
+    flex-shrink: 0;
+  }
+
+  .custom-check.checked {
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+
+  .custom-check.checked::after {
+    content: '✓';
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #000;
+    font-size: 12px;
+    font-weight: 700;
   }
 
   .field-placeholder {
@@ -401,28 +771,49 @@
   }
 
   .btn-remove-field {
-    height: 40px;
-    min-width: 40px;
-    border-radius: 8px;
-    border: 1px solid rgba(239, 68, 68, 0.25);
-    background: rgba(239, 68, 68, 0.10);
+    height: 38px;
+    min-width: 38px;
+    border-radius: var(--radius-sm);
+    border: 1px solid rgba(248, 113, 113, 0.15);
+    background: var(--red-dim);
     color: #fca5a5;
     cursor: pointer;
     font-weight: 700;
+    font-size: 16px;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .btn-remove-field:hover {
+    background: rgba(248, 113, 113, 0.15);
+    border-color: rgba(248, 113, 113, 0.3);
+    color: var(--red);
   }
 
   .btn-add-field {
     width: 100%;
     margin-top: 14px;
-    padding: 12px 14px;
-    border-radius: 10px;
-    border: 1px dashed rgba(0, 209, 255, 0.35);
-    background: #122034;
+    padding: 14px;
+    border-radius: var(--radius-md);
+    border: 1px dashed rgba(0, 212, 255, 0.2);
+    background: var(--accent-dim);
     color: var(--accent);
     font-weight: 700;
+    font-size: 13px;
+    font-family: var(--font-body);
     cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: -0.2px;
   }
 
+  .btn-add-field:hover {
+    background: var(--accent-glow);
+    border-color: rgba(0, 212, 255, 0.35);
+  }
+
+  /* ── Preview ── */
   .preview-box {
     display: flex;
     flex-direction: column;
@@ -430,20 +821,31 @@
   }
 
   .preview-header {
-    background: #0f172a;
+    background: var(--bg-surface);
     border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 14px;
+    border-radius: var(--radius-md);
+    padding: 16px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .preview-header::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent), transparent);
   }
 
   .preview-name {
-    font-size: 15px;
+    font-size: 16px;
     font-weight: 700;
     color: var(--text-main);
+    letter-spacing: -0.3px;
   }
 
   .preview-meta {
-    margin-top: 6px;
+    margin-top: 5px;
     font-size: 12px;
     color: var(--text-muted);
   }
@@ -451,27 +853,27 @@
   .preview-channel {
     display: inline-block;
     margin-top: 10px;
-    padding: 5px 8px;
+    padding: 4px 10px;
     border-radius: 999px;
-    background: rgba(0, 209, 255, 0.10);
-    border: 1px solid rgba(0, 209, 255, 0.20);
+    background: var(--accent-dim);
+    border: 1px solid rgba(0, 212, 255, 0.15);
     color: var(--accent);
-    font-size: 11px;
+    font-size: 10px;
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.6px;
+    letter-spacing: 0.5px;
   }
 
   .preview-fields {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 8px;
   }
 
   .preview-field {
-    background: #0f172a;
+    background: var(--bg-surface);
     border: 1px solid var(--border);
-    border-radius: 10px;
+    border-radius: var(--radius-md);
     padding: 12px;
   }
 
@@ -480,60 +882,82 @@
     font-weight: 700;
     letter-spacing: 0.5px;
     text-transform: uppercase;
-    color: var(--text-muted);
+    color: var(--text-secondary);
     display: block;
     margin-bottom: 8px;
   }
 
   .preview-field-box {
-    min-height: 38px;
-    border-radius: 8px;
-    border: 1px solid #2a3446;
-    background: #172033;
+    min-height: 34px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    background: var(--bg-input);
   }
 
   .preview-empty {
-    padding: 16px;
-    border-radius: 12px;
+    padding: 24px 16px;
+    border-radius: var(--radius-md);
     border: 1px dashed var(--border);
     color: var(--text-muted);
     text-align: center;
     font-size: 13px;
-    background: #0f172a;
+    background: var(--bg-surface);
   }
 
+  /* ── Modal Footer ── */
   .modal-footer {
     display: flex;
     justify-content: flex-end;
-    gap: 12px;
-    padding: 18px 22px;
+    gap: 10px;
+    padding: 18px 24px;
     border-top: 1px solid var(--border);
-    background: #0f172a;
+    background: var(--bg-card);
   }
 
   .btn-cancel-modal {
     background: transparent;
-    color: var(--text-muted);
+    color: var(--text-secondary);
     border: 1px solid var(--border);
-    padding: 12px 18px;
-    border-radius: 10px;
+    padding: 11px 20px;
+    border-radius: var(--radius-sm);
     cursor: pointer;
-    font-weight: 700;
+    font-weight: 600;
+    font-size: 13px;
+    font-family: var(--font-body);
+    transition: all 0.2s;
+    letter-spacing: -0.2px;
+  }
+
+  .btn-cancel-modal:hover {
+    border-color: var(--text-muted);
+    color: var(--text-main);
   }
 
   .btn-save-template {
     background: var(--accent);
     color: #000;
     border: none;
-    padding: 12px 18px;
-    border-radius: 10px;
+    padding: 11px 22px;
+    border-radius: var(--radius-sm);
     cursor: pointer;
     font-weight: 700;
+    font-size: 13px;
+    font-family: var(--font-body);
+    transition: all 0.2s;
+    letter-spacing: -0.2px;
   }
 
+  .btn-save-template:hover {
+    box-shadow: 0 4px 20px rgba(0, 212, 255, 0.3);
+    transform: translateY(-1px);
+  }
+
+  /* ═══════════════════════════════════════
+     RESPONSIVE
+  ═══════════════════════════════════════ */
   @media (max-width: 1400px) {
     .template-grid {
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     }
   }
 
@@ -541,118 +965,138 @@
     .template-builder-grid {
       grid-template-columns: 1fr;
     }
-
     .form-grid {
       grid-template-columns: 1fr;
     }
-
     .template-field-top {
       grid-template-columns: 1fr;
     }
-
     .use-field-box {
       justify-content: flex-start;
       padding-bottom: 0;
     }
   }
+
+  @media (max-width: 640px) {
+    .app-shell { padding: 14px 16px 40px; }
+    .system-nav { flex-wrap: wrap; gap: 10px; }
+    .template-count { display: none; }
+  }
 </style>
 </head>
 <body>
 
+<div class="app-shell">
+
 <nav class="system-nav">
   <div class="logo-area">
-    <h1>RADAR <span>8</span></h1>
+    <div class="logo-mark">R8</div>
+    <div class="logo-text">
+      <h1>RADAR <span>8</span></h1>
+      <small>Gestão de Templates</small>
+    </div>
   </div>
-  <button class="btn-new" id="openTemplateModal">+ Novo Template</button>
+  <div class="nav-actions">
+    <div class="template-count"><strong id="cardCount">5</strong> templates</div>
+    <button class="btn-new" id="openTemplateModal">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Novo Template
+    </button>
+  </div>
 </nav>
 
-<div class="template-grid">
+<div class="template-grid" id="templateGrid">
 
   <article class="card">
     <div class="card-header">
-      <span class="card-title">1. E-mail</span>
+      <span class="card-title"><span class="card-number">01</span>E-mail</span>
       <div class="header-actions">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+        <button class="icon-btn" title="Editar"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
       </div>
     </div>
     <div class="card-body">
-      <div class="field"><label class="field-label">Para</label><div class="input-wrapper"><input type="text" class="field-input" value="exemplo@cliente.com"><button class="copy-btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></button></div></div>
-      <div class="field"><label class="field-label">C/c</label><div class="input-wrapper"><input type="text" class="field-input" value=""><button class="copy-btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></button></div></div>
-      <div class="field"><label class="field-label">Assunto</label><div class="input-wrapper"><input type="text" class="field-input" value="Apresentação Radar 8"><button class="copy-btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></button></div></div>
-      <div class="field"><label class="field-label">Texto</label><div class="input-wrapper"><textarea class="field-input field-input--tall">Olá, segue apresentação...</textarea><button class="copy-btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></button></div></div>
-      <div class="field"><label class="field-label">Instruções</label><div class="input-wrapper"><input type="text" class="field-input" value="Enviar em horário comercial"><button class="copy-btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></button></div></div>
+      <div class="field"><label class="field-label">Para</label><div class="input-wrapper"><input type="text" class="field-input" value="exemplo@cliente.com"><button class="copy-btn" title="Copiar"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button></div></div>
+      <div class="field"><label class="field-label">C/c</label><div class="input-wrapper"><input type="text" class="field-input" value=""><button class="copy-btn" title="Copiar"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button></div></div>
+      <div class="field"><label class="field-label">Assunto</label><div class="input-wrapper"><input type="text" class="field-input" value="Apresentação Radar 8"><button class="copy-btn" title="Copiar"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button></div></div>
+      <div class="field"><label class="field-label">Texto</label><div class="input-wrapper"><textarea class="field-input field-input--tall">Olá, segue apresentação...</textarea><button class="copy-btn" title="Copiar"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button></div></div>
+      <div class="field"><label class="field-label">Instruções</label><div class="input-wrapper"><input type="text" class="field-input" value="Enviar em horário comercial"><button class="copy-btn" title="Copiar"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button></div></div>
     </div>
-    <div class="card-footer"><span class="badge badge-auto">● Automação Futura</span></div>
+    <div class="card-footer"><span class="badge badge-auto">Automação Futura</span></div>
   </article>
 
   <article class="card">
     <div class="card-header">
-      <span class="card-title">2. Celular</span>
+      <span class="card-title"><span class="card-number">02</span>Celular</span>
       <div class="header-actions">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+        <button class="icon-btn" title="Editar"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
       </div>
     </div>
     <div class="card-body">
-      <div class="field"><label class="field-label">Celular (55 DDD...)</label><div class="input-wrapper"><input type="text" class="field-input" value="5511999999999"><button class="copy-btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></button></div></div>
-      <div class="field"><label class="field-label">Mensagem Whatsapp</label><div class="input-wrapper"><textarea class="field-input field-input--tall">Oi, sou o Victor do Radar 8!</textarea><button class="copy-btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></button></div></div>
-      <div class="field"><label class="field-label">SMS</label><div class="input-wrapper"><input type="text" class="field-input" value="Seu código é 1234"><button class="copy-btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></button></div></div>
-      <div class="field"><label class="field-label">Instrução IA</label><div class="input-wrapper"><input type="text" class="field-input" value="Tom de voz amigável"><button class="copy-btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></button></div></div>
+      <div class="field"><label class="field-label">Celular (55 DDD...)</label><div class="input-wrapper"><input type="text" class="field-input" value="5511999999999"><button class="copy-btn" title="Copiar"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button></div></div>
+      <div class="field"><label class="field-label">Mensagem Whatsapp</label><div class="input-wrapper"><textarea class="field-input field-input--tall">Oi, sou o Victor do Radar 8!</textarea><button class="copy-btn" title="Copiar"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button></div></div>
+      <div class="field"><label class="field-label">SMS</label><div class="input-wrapper"><input type="text" class="field-input" value="Seu código é 1234"><button class="copy-btn" title="Copiar"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button></div></div>
+      <div class="field"><label class="field-label">Instrução IA</label><div class="input-wrapper"><input type="text" class="field-input" value="Tom de voz amigável"><button class="copy-btn" title="Copiar"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button></div></div>
     </div>
-    <div class="card-footer"><span class="badge badge-auto">● Automação Futura</span></div>
+    <div class="card-footer"><span class="badge badge-auto">Automação Futura</span></div>
   </article>
 
   <article class="card">
     <div class="card-header">
-      <span class="card-title">3. Redes sociais</span>
+      <span class="card-title"><span class="card-number">03</span>Redes sociais</span>
       <div class="header-actions">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+        <button class="icon-btn" title="Editar"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
       </div>
     </div>
     <div class="card-body">
-      <div class="field"><label class="field-label">Abrir Instagram / Mensagem</label><div class="input-wrapper"><input type="text" class="field-input" value="@perfil_cliente"><button class="copy-btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></button></div></div>
-      <div class="field"><label class="field-label">Instruções</label><div class="input-wrapper"><input type="text" class="field-input" value="Curtir 3 fotos antes"><button class="copy-btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></button></div></div>
-      <div class="field"><label class="field-label">Facebook</label><div class="input-wrapper"><input type="text" class="field-input" value="Postagem grupo X"><button class="copy-btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></button></div></div>
+      <div class="field"><label class="field-label">Instagram / Perfil</label><div class="input-wrapper"><input type="text" class="field-input" value="@perfil_cliente"><button class="copy-btn" title="Copiar"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button></div></div>
+      <div class="field"><label class="field-label">Instruções</label><div class="input-wrapper"><input type="text" class="field-input" value="Curtir 3 fotos antes"><button class="copy-btn" title="Copiar"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button></div></div>
+      <div class="field"><label class="field-label">Facebook</label><div class="input-wrapper"><input type="text" class="field-input" value="Postagem grupo X"><button class="copy-btn" title="Copiar"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button></div></div>
     </div>
-    <div class="card-footer"><span class="badge badge-auto">● Automação Futura</span></div>
+    <div class="card-footer"><span class="badge badge-auto">Automação Futura</span></div>
   </article>
 
   <article class="card">
     <div class="card-header">
-      <span class="card-title">4. Inmail</span>
+      <span class="card-title"><span class="card-number">04</span>Inmail</span>
       <div class="header-actions">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+        <button class="icon-btn" title="Editar"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
       </div>
     </div>
     <div class="card-body">
-      <div class="field"><label class="field-label">Assunto</label><div class="input-wrapper"><input type="text" class="field-input" value="Conexão Estratégica"><button class="copy-btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></button></div></div>
-      <div class="field"><label class="field-label">Texto</label><div class="input-wrapper"><textarea class="field-input field-input--tall">Vi seu perfil no LinkedIn...</textarea><button class="copy-btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></button></div></div>
+      <div class="field"><label class="field-label">Assunto</label><div class="input-wrapper"><input type="text" class="field-input" value="Conexão Estratégica"><button class="copy-btn" title="Copiar"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button></div></div>
+      <div class="field"><label class="field-label">Texto</label><div class="input-wrapper"><textarea class="field-input field-input--tall">Vi seu perfil no LinkedIn...</textarea><button class="copy-btn" title="Copiar"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button></div></div>
     </div>
   </article>
 
   <article class="card">
     <div class="card-header">
-      <span class="card-title">5. Mail</span>
+      <span class="card-title"><span class="card-number">05</span>Mail</span>
       <div class="header-actions">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+        <button class="icon-btn" title="Editar"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
       </div>
     </div>
     <div class="card-body">
-      <div class="field"><label class="field-label">Destinatário</label><div class="input-wrapper"><input type="text" class="field-input" value="João Silva"><button class="copy-btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></button></div></div>
-      <div class="field"><label class="field-label">Conteúdo</label><div class="input-wrapper"><textarea class="field-input field-input--tall">Kit Boas Vindas Radar 8</textarea><button class="copy-btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></button></div></div>
-      <div class="field"><label class="field-label">Anexos</label><div class="input-wrapper"><input type="text" class="field-input" value="Folder_v1.pdf"><button class="copy-btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></button></div></div>
+      <div class="field"><label class="field-label">Destinatário</label><div class="input-wrapper"><input type="text" class="field-input" value="João Silva"><button class="copy-btn" title="Copiar"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button></div></div>
+      <div class="field"><label class="field-label">Conteúdo</label><div class="input-wrapper"><textarea class="field-input field-input--tall">Kit Boas Vindas Radar 8</textarea><button class="copy-btn" title="Copiar"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button></div></div>
+      <div class="field"><label class="field-label">Anexos</label><div class="input-wrapper"><input type="text" class="field-input" value="Folder_v1.pdf"><button class="copy-btn" title="Copiar"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button></div></div>
     </div>
   </article>
 
 </div>
 
-<div id="toast">Copiado para a área de transferência!</div>
+</div><!-- /app-shell -->
 
+<div id="toast">Copiado!</div>
+
+<!-- ═══════════════════════════════════════
+     MODAL NOVO TEMPLATE
+═══════════════════════════════════════ -->
 <div class="modal-overlay" id="templateModalOverlay">
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="templateModalTitle">
     <div class="modal-header">
       <div class="modal-title-wrap">
         <h2 class="modal-title" id="templateModalTitle">Novo Template</h2>
-        <p class="modal-subtitle">Comece com um modelo que já existe e ajuste os campos do seu jeito.</p>
+        <p class="modal-subtitle">Comece com um modelo base e ajuste os campos do seu jeito.</p>
       </div>
       <button class="modal-close" id="closeTemplateModal" aria-label="Fechar">×</button>
     </div>
@@ -702,12 +1146,12 @@
 
           <div class="switch-row">
             <span>Marcar como automação futura</span>
-            <input type="checkbox" id="templateAutomation" checked>
+            <div class="toggle-track active" id="templateAutomation" role="checkbox" aria-checked="true" tabindex="0"></div>
           </div>
 
           <div class="section-divider">
             <div class="section-title">Campos Do Template</div>
-            <div class="section-subtitle">Os campos abaixo já vêm do modelo base. Basta manter, retirar ou complementar.</div>
+            <div class="section-subtitle">Os campos abaixo já vêm do modelo base. Mantenha, retire ou complemente.</div>
 
             <div class="template-fields-list" id="templateFieldsList"></div>
 
@@ -728,7 +1172,7 @@
             <div class="preview-fields" id="previewFields"></div>
 
             <div class="card-footer" style="padding:0; border-top:none;">
-              <span class="badge badge-auto" id="previewAutomationBadge">● Automação Futura</span>
+              <span class="badge badge-auto" id="previewAutomationBadge">Automação Futura</span>
             </div>
           </div>
         </div>
@@ -744,22 +1188,24 @@
 </div>
 
 <script>
+  /* ── Copy buttons ── */
   document.querySelectorAll('.copy-btn').forEach(btn => {
     btn.addEventListener('click', function() {
       const input = this.parentElement.querySelector('.field-input');
-      input.select();
-      document.execCommand('copy');
+      const val = input.value || input.textContent;
+      navigator.clipboard.writeText(val).catch(() => {
+        input.select();
+        document.execCommand('copy');
+      });
 
-      const toast = document.getElementById('toast');
-      toast.textContent = 'Copiado para a área de transferência!';
-      toast.style.display = 'block';
-      setTimeout(() => { toast.style.display = 'none'; }, 2000);
+      showToast('Copiado para a área de transferência!');
 
-      this.style.color = 'var(--accent)';
-      setTimeout(() => { this.style.color = 'var(--text-muted)'; }, 1000);
+      this.classList.add('copied');
+      setTimeout(() => this.classList.remove('copied'), 1200);
     });
   });
 
+  /* ── Base templates ── */
   const baseTemplates = {
     email: {
       label: 'E-mail',
@@ -825,6 +1271,7 @@
     }
   };
 
+  /* ── DOM refs ── */
   const openTemplateModal = document.getElementById('openTemplateModal');
   const templateModalOverlay = document.getElementById('templateModalOverlay');
   const closeTemplateModal = document.getElementById('closeTemplateModal');
@@ -847,6 +1294,24 @@
   const previewFields = document.getElementById('previewFields');
   const previewAutomationBadge = document.getElementById('previewAutomationBadge');
 
+  /* ── Toggle switch ── */
+  let automationEnabled = true;
+
+  templateAutomation.addEventListener('click', () => {
+    automationEnabled = !automationEnabled;
+    templateAutomation.classList.toggle('active', automationEnabled);
+    templateAutomation.setAttribute('aria-checked', automationEnabled);
+    updatePreview();
+  });
+
+  templateAutomation.addEventListener('keydown', (e) => {
+    if (e.key === ' ' || e.key === 'Enter') {
+      e.preventDefault();
+      templateAutomation.click();
+    }
+  });
+
+  /* ── Helpers ── */
   function openModal() {
     templateModalOverlay.classList.add('active');
     document.body.style.overflow = 'hidden';
@@ -860,8 +1325,13 @@
   function showToast(message) {
     const toast = document.getElementById('toast');
     toast.textContent = message;
-    toast.style.display = 'block';
-    setTimeout(() => { toast.style.display = 'none'; }, 2200);
+    toast.className = 'visible';
+    toast.style.display = 'flex';
+    clearTimeout(toast._timer);
+    toast._timer = setTimeout(() => {
+      toast.style.display = 'none';
+      toast.className = '';
+    }, 2400);
   }
 
   function escapeHtml(value) {
@@ -874,31 +1344,23 @@
   }
 
   function getTypeLabel(type) {
-    const map = {
-      text: 'Texto Curto',
-      textarea: 'Texto Longo',
-      email: 'E-mail',
-      number: 'Número',
-      date: 'Data'
-    };
-    return map[type] || 'Campo';
+    return { text: 'Texto Curto', textarea: 'Texto Longo', email: 'E-mail', number: 'Número', date: 'Data' }[type] || 'Campo';
   }
 
+  /* ── Field card builder ── */
   function createFieldCard(field = { label: '', type: 'text', placeholder: '', enabled: true }) {
     const item = document.createElement('div');
-    item.className = 'template-field-card';
+    item.className = 'template-field-card' + (field.enabled ? '' : ' disabled');
 
     item.innerHTML = `
       <div class="template-field-top">
         <div class="use-field-box">
-          <input type="checkbox" class="js-enabled" ${field.enabled ? 'checked' : ''} title="Usar este campo">
+          <div class="custom-check ${field.enabled ? 'checked' : ''}" role="checkbox" aria-checked="${field.enabled}" tabindex="0"></div>
         </div>
-
         <div class="field">
           <label class="field-label">Nome Do Campo</label>
           <input type="text" class="field-input js-label" value="${escapeHtml(field.label)}" placeholder="Nome do campo">
         </div>
-
         <div class="field">
           <label class="field-label">Tipo</label>
           <select class="field-select js-type">
@@ -909,15 +1371,32 @@
             <option value="date" ${field.type === 'date' ? 'selected' : ''}>Data</option>
           </select>
         </div>
-
         <button class="btn-remove-field" type="button" title="Remover campo">×</button>
       </div>
-
       <div class="field field-placeholder">
         <label class="field-label">Placeholder</label>
         <input type="text" class="field-input js-placeholder" value="${escapeHtml(field.placeholder)}" placeholder="Ex.: Digite aqui">
       </div>
     `;
+
+    const checkbox = item.querySelector('.custom-check');
+    let enabled = field.enabled;
+
+    function toggleCheck() {
+      enabled = !enabled;
+      checkbox.classList.toggle('checked', enabled);
+      checkbox.setAttribute('aria-checked', enabled);
+      item.classList.toggle('disabled', !enabled);
+      updatePreview();
+    }
+
+    checkbox.addEventListener('click', toggleCheck);
+    checkbox.addEventListener('keydown', (e) => {
+      if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); toggleCheck(); }
+    });
+
+    // Store getter on the card element
+    item._getEnabled = () => enabled;
 
     item.querySelectorAll('input, select').forEach(el => {
       el.addEventListener('input', updatePreview);
@@ -925,8 +1404,10 @@
     });
 
     item.querySelector('.btn-remove-field').addEventListener('click', () => {
-      item.remove();
-      updatePreview();
+      item.style.opacity = '0';
+      item.style.transform = 'translateX(-10px)';
+      item.style.transition = 'all 0.2s';
+      setTimeout(() => { item.remove(); updatePreview(); }, 200);
     });
 
     templateFieldsList.appendChild(item);
@@ -934,7 +1415,7 @@
 
   function getCurrentFields() {
     return [...templateFieldsList.querySelectorAll('.template-field-card')].map(card => ({
-      enabled: card.querySelector('.js-enabled').checked,
+      enabled: card._getEnabled ? card._getEnabled() : true,
       label: card.querySelector('.js-label').value.trim(),
       type: card.querySelector('.js-type').value,
       placeholder: card.querySelector('.js-placeholder').value.trim()
@@ -946,38 +1427,39 @@
     previewMeta.textContent = templateCategory.value.trim() || 'Sem categoria definida';
     previewChannel.textContent = templateChannel.value.trim() || 'Sem canal';
 
-    previewAutomationBadge.style.display = templateAutomation.checked ? 'inline-flex' : 'none';
+    previewAutomationBadge.style.display = automationEnabled ? 'inline-flex' : 'none';
 
-    const activeFields = getCurrentFields().filter(field => field.enabled);
+    const activeFields = getCurrentFields().filter(f => f.enabled);
 
     if (!activeFields.length) {
-      previewFields.innerHTML = `<div class="preview-empty">Nenhum campo ativo no template.</div>`;
+      previewFields.innerHTML = '<div class="preview-empty">Nenhum campo ativo no template.</div>';
       return;
     }
 
-    previewFields.innerHTML = activeFields.map(field => `
+    previewFields.innerHTML = activeFields.map(f => `
       <div class="preview-field">
-        <span class="preview-field-label">${escapeHtml(field.label || 'Campo sem nome')} • ${escapeHtml(getTypeLabel(field.type))}</span>
+        <span class="preview-field-label">${escapeHtml(f.label || 'Campo sem nome')} · ${escapeHtml(getTypeLabel(f.type))}</span>
         <div class="preview-field-box"></div>
       </div>
     `).join('');
   }
 
-  function loadBaseTemplate(templateKey) {
-    const template = baseTemplates[templateKey];
-    if (!template) return;
+  function loadBaseTemplate(key) {
+    const t = baseTemplates[key];
+    if (!t) return;
 
     templateName.value = '';
-    templateChannel.value = template.channel;
-    templateCategory.value = template.category;
-    templateDescription.value = template.description;
-    baseTemplateNote.textContent = template.note;
+    templateChannel.value = t.channel;
+    templateCategory.value = t.category;
+    templateDescription.value = t.description;
+    baseTemplateNote.textContent = t.note;
     templateFieldsList.innerHTML = '';
 
-    template.fields.forEach(field => createFieldCard(field));
+    t.fields.forEach(f => createFieldCard(f));
     updatePreview();
   }
 
+  /* ── Events ── */
   openTemplateModal.addEventListener('click', () => {
     openModal();
     loadBaseTemplate(baseTemplateModel.value);
@@ -986,51 +1468,41 @@
   closeTemplateModal.addEventListener('click', closeModal);
   cancelTemplateModal.addEventListener('click', closeModal);
 
-  templateModalOverlay.addEventListener('click', function(e) {
+  templateModalOverlay.addEventListener('click', (e) => {
     if (e.target === templateModalOverlay) closeModal();
   });
 
-  document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape' && templateModalOverlay.classList.contains('active')) {
-      closeModal();
-    }
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && templateModalOverlay.classList.contains('active')) closeModal();
   });
 
   baseTemplateModel.addEventListener('change', function() {
     loadBaseTemplate(this.value);
   });
 
-  [templateName, templateChannel, templateCategory, templateDescription, templateAutomation].forEach(el => {
+  [templateName, templateChannel, templateCategory, templateDescription].forEach(el => {
     el.addEventListener('input', updatePreview);
     el.addEventListener('change', updatePreview);
   });
 
-  addFieldBtn.addEventListener('click', function() {
-    createFieldCard({
-      label: '',
-      type: 'text',
-      placeholder: '',
-      enabled: true
-    });
+  addFieldBtn.addEventListener('click', () => {
+    createFieldCard({ label: '', type: 'text', placeholder: '', enabled: true });
     updatePreview();
+    templateFieldsList.lastElementChild.scrollIntoView({ behavior: 'smooth', block: 'center' });
   });
 
-  saveTemplateBtn.addEventListener('click', function() {
+  saveTemplateBtn.addEventListener('click', () => {
     const name = templateName.value.trim();
-    const activeFields = getCurrentFields().filter(field => field.enabled);
+    const activeFields = getCurrentFields().filter(f => f.enabled);
 
-    if (!name) {
-      showToast('Preencha o nome do template.');
-      return;
-    }
-
-    if (!activeFields.length) {
-      showToast('Deixe pelo menos um campo ativo.');
-      return;
-    }
+    if (!name) { showToast('Preencha o nome do template.'); return; }
+    if (!activeFields.length) { showToast('Deixe pelo menos um campo ativo.'); return; }
 
     showToast('Template configurado com sucesso!');
     closeModal();
+
+    // Update card count
+    document.getElementById('cardCount').textContent = document.querySelectorAll('#templateGrid .card').length;
   });
 
   loadBaseTemplate('email');
